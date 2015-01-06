@@ -1,0 +1,223 @@
+<?php
+/**
+ * Implements hook_menu().
+ */
+function gameservers_menu() {
+  $items['gameservers'] = array(
+    'page callback' => 'gameservers_view_serverlist',
+    'access callback' => TRUE,
+  );
+  $items['gameserver/%'] = array(
+    'title' => 'Gameserver',
+    'page callback' => 'gameservers_view_server',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function gameservers_entity_info() {
+
+  $info = array();
+
+  $info['gameserver'] = array(
+    'label' => t('Gameserver'),
+    'plural label' => t('Gameservers'),
+    'label callback' => 'entity_class_label',
+    'entity class' => 'GameserverEntity',
+    'controller class' => 'GameserverEntityController',
+    'views controller class' => 'EntityDefaultViewsController',
+    'access callback' => 'gameservers_access_callback',
+    'uri callback' => 'entity_class_uri',
+    'admin ui' => array(
+      'path' => 'admin/structure/gameservers',
+      'controller class' => 'EntityDefaultUIController',
+    ),
+    'base table' => 'gameservers',
+    'fieldable' => TRUE,
+    'bundles' => array(
+      'gameserver' => array(
+        'label' => t('Gameserver'),
+        'admin' => array(
+          'path' => 'admin/structure/gameservers',
+        ),
+      ),
+    ),
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full view'),
+        'custom settings' => FALSE,
+      ),
+      'teaser' => array(
+        'label' => t('Teaser view'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'name',
+    ),
+    'module' => 'gameservers',
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function gameservers_entity_property_info() {
+
+  // Reuse the field info from our form function.
+  $form_state = array();
+  $form_info = gameserver_form(array(), $form_state);
+
+  $info = array();
+
+  $info['gameserver']['properties']['id'] = array(
+    'label' => t('Gameserver ID'),
+    'description' => t('The ID of the gameserver.'),
+    'type' => 'integer',
+    'schema field' => 'id',
+  );
+  $info['gameserver']['properties']['name'] = array(
+    'label' => $form_info['name']['#title'],
+    'description' => t('Name of the gameserver.'),
+    'type' => 'text',
+    'schema field' => 'name',
+  );
+  $info['gameserver']['properties']['description'] = array(
+    'label' => $form_info['description']['#title'],
+    'description' => t('Description of the gameserver.'),
+    'type' => 'text',
+    'schema field' => 'description',
+  );
+  $info['gameserver']['properties']['ip'] = array(
+    'label' => $form_info['ip']['#title'],
+    'description' => t('Gameserver IP address.'),
+    'type' => 'text',
+    'schema field' => 'ip',
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_libraries_info().
+ *
+ * Defines the external GameQ library.
+ */
+function gameservers_libraries_info() {
+  $libraries['gameq'] = array(
+    'name' => 'GameQ library',
+    'vendor url' => 'https://github.com/Austinb/gameq',
+    'download url' => 'https://github.com/Austinb/GameQ/archive/v2.zip',
+    'version arguments' => array(
+      'file' => 'GameQ.php',
+      'pattern' => '/VERSION\s=\s\'([0-9\.]+)/',
+      'lines' => 60,
+    ),
+    'files' => array(
+      'php' => array('GameQ.php'),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Callback to display a list of all gameservers.
+ */
+function gameservers_view_serverlist() {
+
+  $gameservers = entity_load('gameserver', FALSE);
+  $list = entity_view('gameserver', $gameservers);
+
+  $output = array();
+  foreach ($list['gameserver'] as $gameserver) {
+    $output[] = drupal_render($gameserver);
+  }
+
+  return implode($output);
+}
+
+/**
+ * Callback function for displaying the individual gameserver page.
+ */
+function gameservers_view_server($id) {
+
+  $gameservers = entity_load('gameserver', array($id));
+  $gameserver = $gameservers[$id];
+
+  drupal_set_title($gameserver->name);
+  $output = entity_view('gameserver', array($gameserver));
+
+  return $output;
+}
+
+/**
+ * Access callback for gameserver entities.
+ */
+function gameservers_access_callback($op, $server = NULL, $account = NULL) {
+  // TODO: Implement sensible access checks here.
+  if ($op == 'view' || $op == 'update' || $op == 'create' || $op == 'delete') {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+
+/**
+ * Form definition for adding / editing a gameserver.
+ */
+function gameserver_form($form, &$form_state, $server = NULL) {
+
+  $form['name'] = array(
+    '#title' => t('Server name'),
+    '#type' => 'textfield',
+    '#default_value' => isset($server->name) ? $server->name : '',
+    '#required' => TRUE,
+  );
+
+  $form['description'] = array(
+    '#title' => t('Server description'),
+    '#type' => 'textarea',
+    '#default_value' => isset($server->description) ? $server->description : '',
+    '#required' => TRUE,
+  );
+
+  $form['ip'] = array(
+    '#title' => t('Server IP'),
+    '#type' => 'textfield',
+    '#default_value' => isset($server->ip) ? $server->ip : '',
+    '#required' => TRUE,
+  );
+
+  field_attach_form('gameserver', $server, $form, $form_state);
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => isset($server->id) ? t('Update server') : t('Save server'),
+    '#weight' => 50,
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for the gameserver add/edit form.
+ */
+function gameserver_form_submit($form, &$form_state) {
+  // Use the entity UI controller helper function entity_ui_form_submit_build_entity()
+  // to populate the entity properties with $form_state values.
+  $server = entity_ui_form_submit_build_entity($form, $form_state);
+  $server->save();
+  drupal_set_message(t('The server <em>@name</em> has been saved.', array('@name' => $server->name)));
+  // TODO: This redirect won't work for user-submitted gameservers.
+  $form_state['redirect'] = 'admin/structure/gameservers';
+}

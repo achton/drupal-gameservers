@@ -1,0 +1,105 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function gameservers_schema() {
+
+  $schema = array();
+
+  $schema['gameservers'] = array(
+    'description' => 'The base table for the Gameserver entity',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Primary key of the Gameserver entity',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Gameserver name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'description' => array(
+        'description' => 'Gameserver description.',
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'default' => NULL
+      ),
+      'ip' => array(
+        'description' => 'IP address',
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'uid' => array(
+        'description' => 'The {users}.uid that owns this instance; initially, this is the user that created it.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'Boolean indicating whether the instance is published (visible to non-administrators).',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the server was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the server was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'entity_changed' => array('changed'),
+      'entity_created' => array('created'),
+      'uid' => array('uid'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function gameservers_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+  $lib_name = 'gameq';
+
+  if ($phase == 'runtime') {
+
+    $library = libraries_detect($lib_name);
+    if ($library && !empty($library['installed'])) {
+      $requirements['gameservers'] = array(
+        'title' => $t('Gameservers: GameQ library'),
+        'value' => $t('GameQ library is available.'),
+        'severity' => REQUIREMENT_OK,
+      );
+    }
+    else {
+      $requirements['gameservers'] = array(
+        'title' => $t('Gameservers: GameQ library'),
+        'description' => $library['error message'],
+        'value' => $t('GameQ library is not available.'),
+        'severity' => REQUIREMENT_ERROR,
+      );
+    }
+
+  }
+
+  return $requirements;
+}

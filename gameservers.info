@@ -1,0 +1,9 @@
+name = Gameservers
+description = Allows users to create and query game servers and represent server data in Views and other contrib modules.
+core = 7.x
+
+dependencies[] = entity
+dependencies[] = libraries
+
+files[] = includes/gameserver.inc
+
