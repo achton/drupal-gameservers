@@ -17,33 +17,41 @@ function gameservers_schema() {
         'not null' => TRUE,
       ),
       'name' => array(
-        'description' => 'Gameserver name.',
+        'description' => 'Gameserver name',
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 128,
         'not null' => FALSE,
       ),
       'description' => array(
-        'description' => 'Gameserver description.',
+        'description' => 'Gameserver description',
         'type' => 'text',
-        'size' => 'big',
-        'not null' => FALSE,
-        'default' => NULL
+        'size' => 'medium',
+        'not null' => TRUE,
       ),
       'ip' => array(
-        'description' => 'IP address',
+        'description' => 'Server IP address',
         'type' => 'varchar',
-        'length' => 40,
+        'length' => 128,
+      ),
+      'port' => array(
+        'description' => 'Server query port',
+        'type' => 'int',
         'not null' => TRUE,
-        'default' => '',
+      ),
+      'type' => array(
+        'description' => 'Server type',
+        'type' => 'varchar',
+        'length' => 128,
       ),
       'uid' => array(
-        'description' => 'The {users}.uid that owns this instance; initially, this is the user that created it.',
+        'description' => 'The {users}.uid that owns this server; initially, this is the user that created it.',
         'type' => 'int',
+        'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
       'status' => array(
-        'description' => 'Boolean indicating whether the instance is published (visible to non-administrators).',
+        'description' => 'Boolean indicating whether the server is published (visible to non-administrators).',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 1,
@@ -82,24 +90,30 @@ function gameservers_requirements($phase) {
 
   if ($phase == 'runtime') {
 
+    $requirements['gameservers'] = array(
+      'title' => $t('Gameservers: GameQ library')
+    );
+
     $library = libraries_detect($lib_name);
     if ($library && !empty($library['installed'])) {
-      $requirements['gameservers'] = array(
-        'title' => $t('Gameservers: GameQ library'),
-        'value' => $t('GameQ library is available.'),
-        'severity' => REQUIREMENT_OK,
-      );
+      $requirements['gameservers']['value'] = $t('GameQ library is available.');
+      $requirements['gameservers']['severity'] = REQUIREMENT_OK;
     }
     else {
-      $requirements['gameservers'] = array(
-        'title' => $t('Gameservers: GameQ library'),
-        'description' => $library['error message'],
-        'value' => $t('GameQ library is not available.'),
-        'severity' => REQUIREMENT_ERROR,
-      );
+      $requirements['gameservers']['description'] = $library['error message'];
+      $requirements['gameservers']['value'] = $t('GameQ library is not available.');
+      $requirements['gameservers']['severity'] = REQUIREMENT_ERROR;
     }
 
   }
 
   return $requirements;
+}
+
+
+/**
+* Implements hook_uninstall().
+*/
+function gameservers_uninstall() {
+  //variable_del('variable_name');
 }
