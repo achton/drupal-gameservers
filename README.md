@@ -1,8 +1,9 @@
-# drupal-gameservers
+# Gameservers
 Gameservers is a Drupal module that queries multiple types of online game servers and makes server information available to Drupal entities using 3rd party libraries like [GameQ](https://github.com/Austinb/GameQ).
 
 ## Requirements
-1. [GameQ library v2.0.0](https://github.com/Austinb/GameQ/releases/tag/v2.0.0).
+1. [Drupal CMS](https://www.drupal.org/) v7.x
+1. [GameQ library v2.0.0](https://github.com/Austinb/GameQ/releases/tag/v2.0.0)
 
 ## Installation
 1. Download and unpack the gameservers module to your drupal-root/sites/all/modules/contrib directory.
