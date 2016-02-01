@@ -9,4 +9,4 @@ Gameservers is a [Drupal](https://www.drupal.org/) module that queries multiple 
 1. Download and unpack the gameservers module to your `drupal-root/sites/all/modules/contrib` directory.
 2. Download and unpack the [GameQ library v2.0.0](https://github.com/Austinb/GameQ/releases/tag/v2.0.0) to your `drupal-root/sites/all/libraries` directory.
 3. Rename the `GameQ-2` directory to `gameq`.
-4. Enable the gameservers module.
+4. Enable the `gameservers` module.
